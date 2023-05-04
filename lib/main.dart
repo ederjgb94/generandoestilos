@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:generandoestilos/invoice.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-
-import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
 
 void main() {
   runApp(
@@ -42,21 +42,23 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      final pdf = pw.Document();
-                      pdf.addPage(
-                        pw.Page(
-                          build: (pw.Context context) => pw.Center(
-                            child: pw.Text(
-                              'CAMPUSTD',
-                              style: pw.TextStyle(
-                                  fontSize: 40, fontWeight: pw.FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      );
-
-                      final file = File('$dir/example.pdf');
-                      await file.writeAsBytes(await pdf.save());
+                      // final pdf = pw.Document();
+                      // pdf.addPage(
+                      //   pw.Page(
+                      //     build: (pw.Context context) => pw.Center(
+                      //       child: pw.Text(
+                      //         'CAMPUSTD',
+                      //         style: pw.TextStyle(
+                      //           fontSize: 40,
+                      //           fontWeight: pw.FontWeight.bold,
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // );
+                      // final file = File('$dir/example.pdf');
+                      // await file.writeAsBytes(await pdf.save());
+                      generateInvoice(PdfPageFormat.letter);
                     },
                     child: const Text("Click Me"),
                   ),
