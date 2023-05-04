@@ -91,8 +91,6 @@ class Invoice {
 
   String? _logo;
 
-  String? _bgShape;
-
   Future<Uint8List> buildPdf(PdfPageFormat pageFormat) async {
     // Create a PDF document.
     final doc = pw.Document();
