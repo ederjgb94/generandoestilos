@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'package:generandoestilos/invoice.dart';
+import 'package:generandoestilos/data.dart';
+import 'package:generandoestilos/estadisticaspdf.dart';
+import 'package:generandoestilos/reporte.dart';
+import 'package:generandoestilos/ticketpdf.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -42,27 +45,13 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      // final pdf = pw.Document();
-                      // pdf.addPage(
-                      //   pw.Page(
-                      //     build: (pw.Context context) => pw.Center(
-                      //       child: pw.Text(
-                      //         'CAMPUSTD',
-                      //         style: pw.TextStyle(
-                      //           fontSize: 40,
-                      //           fontWeight: pw.FontWeight.bold,
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // );
-                      // final file = File('$dir/example.pdf');
-                      // await file.writeAsBytes(await pdf.save());
-                      generateInvoice(PdfPageFormat.letter);
+                      var pdf = await generateReporte(PdfPageFormat.letter);
+                      final file = File('$dir/example5.pdf');
+                      await file.writeAsBytes(pdf);
                     },
-                    child: const Text("Click Me"),
+                    child: const Text("Click Me2"),
                   ),
-                  Text('$dir/example.pdf'),
+                  Text('$dir/example5.pdf'),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -71,7 +60,7 @@ class _HomePageState extends State<HomePage> {
                           builder: (context) => Scaffold(
                             appBar: AppBar(),
                             body: PDFView(
-                              filePath: '$dir/example.pdf',
+                              filePath: '$dir/example5.pdf',
                               enableSwipe: true,
                               swipeHorizontal: true,
                               autoSpacing: false,
@@ -89,8 +78,6 @@ class _HomePageState extends State<HomePage> {
               return const CircularProgressIndicator();
             }
           },
-
-          // child:
         ),
       ),
     );

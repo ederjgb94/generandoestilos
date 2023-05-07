@@ -52,7 +52,6 @@ Future<Uint8List> generateInvoice(PdfPageFormat pageFormat) async {
     baseColor: PdfColors.teal,
     accentColor: PdfColors.blueGrey900,
   );
-
   return await invoice.buildPdf(pageFormat);
 }
 
