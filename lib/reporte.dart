@@ -22,8 +22,7 @@
  *   
  */
 
-import 'dart:typed_data';
-
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -32,21 +31,21 @@ import 'package:printing/printing.dart';
 Future<Uint8List> generateReporte(PdfPageFormat pageFormat) async {
   final lorem = pw.LoremText();
 
-  final products = <Product>[
-    Product('19874', lorem.sentence(4), 3.99, 2),
-    Product('98452', lorem.sentence(6), 15, 2),
-    Product('28375', lorem.sentence(4), 6.95, 3),
-    Product('95673', lorem.sentence(3), 49.99, 4),
-    Product('23763', lorem.sentence(2), 560.03, 1),
-    Product('55209', lorem.sentence(5), 26, 1),
-    Product('09853', lorem.sentence(5), 26, 1),
-    Product('23463', lorem.sentence(5), 34, 1),
-    Product('56783', lorem.sentence(5), 7, 4),
-    Product('78256', lorem.sentence(5), 23, 1),
-    Product('23745', lorem.sentence(5), 94, 1),
-    Product('07834', lorem.sentence(5), 12, 1),
-    Product('23547', lorem.sentence(5), 34, 1),
-    Product('98387', lorem.sentence(5), 7.99, 2),
+  final products = <Item>[
+    Item('19874', lorem.sentence(4), 34.99, 2),
+    Item('98452', lorem.sentence(6), 15, 2),
+    Item('28375', lorem.sentence(4), 6.95, 3),
+    Item('95673', lorem.sentence(3), 49.99, 4),
+    Item('23763', lorem.sentence(2), 560.03, 1),
+    Item('55209', lorem.sentence(5), 26, 1),
+    Item('09853', lorem.sentence(5), 26, 1),
+    Item('23463', lorem.sentence(5), 34, 1),
+    Item('56783', lorem.sentence(5), 7, 4),
+    Item('78256', lorem.sentence(5), 23, 1),
+    Item('23745', lorem.sentence(5), 94, 1),
+    Item('07834', lorem.sentence(5), 12, 1),
+    Item('23547', lorem.sentence(5), 34, 1),
+    Item('98387', lorem.sentence(5), 7.99, 2),
   ];
 
   final invoice = Reporte(
@@ -57,7 +56,7 @@ Future<Uint8List> generateReporte(PdfPageFormat pageFormat) async {
     paymentInfo:
         '4509 Wiseman Street\nKnoxville, Tennessee(TN), 37929\n865-372-0425',
     tax: .15,
-    baseColor: PdfColors.red,
+    baseColor: PdfColors.green,
     accentColor: PdfColors.blueGrey900,
   );
   return await invoice.buildPdf(pageFormat);
@@ -75,7 +74,7 @@ class Reporte {
     required this.accentColor,
   });
 
-  final List<Product> products;
+  final List<Item> products;
   final String customerName;
   final String customerAddress;
   final String invoiceNumber;
@@ -98,13 +97,17 @@ class Reporte {
 
   String? _logo;
 
+  pw.MemoryImage? profileImage;
+
   Future<Uint8List> buildPdf(PdfPageFormat pageFormat) async {
     // Create a PDF document.
     final doc = pw.Document();
 
-    // _logo = await rootBundle.loadString('assets/logo.svg');
+    //_logo = await rootBundle.loadString('assets/logo.png');
     // _bgShape = await rootBundle.loadString('assets/invoice.svg');
-
+    profileImage = pw.MemoryImage(
+      (await rootBundle.load('assets/logo.png')).buffer.asUint8List(),
+    );
     // Add page to the PDF
     doc.addPage(
       pw.MultiPage(
@@ -145,7 +148,7 @@ class Reporte {
                     padding: const pw.EdgeInsets.only(left: 20),
                     alignment: pw.Alignment.centerLeft,
                     child: pw.Text(
-                      'INVOICE',
+                      'REPORTE',
                       style: pw.TextStyle(
                         color: baseColor,
                         fontWeight: pw.FontWeight.bold,
@@ -171,7 +174,7 @@ class Reporte {
                       child: pw.GridView(
                         crossAxisCount: 2,
                         children: [
-                          pw.Text('Invoice #'),
+                          pw.Text('Reporte #'),
                           pw.Text(invoiceNumber),
                           pw.Text('Date:'),
                           pw.Text(_formatDate(DateTime.now())),
@@ -189,9 +192,10 @@ class Reporte {
                   pw.Container(
                     alignment: pw.Alignment.topRight,
                     padding: const pw.EdgeInsets.only(bottom: 8, left: 30),
-                    height: 72,
-                    child:
-                        _logo != null ? pw.SvgImage(svg: _logo!) : pw.PdfLogo(),
+                    height: 150,
+                    child: profileImage != null
+                        ? pw.Image(profileImage!)
+                        : pw.PdfLogo(),
                   ),
                   // pw.Container(
                   //   color: baseColor,
@@ -243,7 +247,7 @@ class Reporte {
       ),
       buildBackground: (context) => pw.FullPage(
         ignoreMargins: true,
-        child: pw.Text('CampusTD'),
+        child: pw.Text(''),
       ),
     );
   }
@@ -509,14 +513,15 @@ String _formatDate(DateTime date) {
   return format.format(date);
 }
 
-class Product {
-  const Product(
+class Item {
+  const Item(
     this.sku,
     this.productName,
     this.price,
     this.quantity,
   );
 
+  static int counter = 0;
   final String sku;
   final String productName;
   final double price;
@@ -526,7 +531,7 @@ class Product {
   String getIndex(int index) {
     switch (index) {
       case 0:
-        return sku;
+        return (counter++).toString();
       case 1:
         return productName;
       case 2:
