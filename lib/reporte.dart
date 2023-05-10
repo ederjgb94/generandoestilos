@@ -28,6 +28,9 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+const String _MessageFooter =
+    '(1)Todarevisiongeneracostosparasuelaboracion.(2)Todaslapiezasobservadasdurantelarevisionseencontraroncomoseexplican.(3)LafinalidaddetodaRevisionesdeterminarellugardondeseencuentraelproblema,antesdegenerarcambiosinnecesarios.(4)sirequierereparacionesadicionalesaplicancargosadicionales.(5)Todosnuestrospreciosson+iva16%.(6)Enparteselectricasnohaygarantiadeningunaespecie.';
+
 Future<Uint8List> generateReporte(PdfPageFormat pageFormat) async {
   final lorem = pw.LoremText();
 
@@ -120,6 +123,28 @@ class Reporte {
         header: _buildHeader,
         footer: _buildFooter,
         build: (context) => [
+          _buildDatosGenerales(context),
+          _contentHeader(context),
+          _contentTable(context),
+          pw.SizedBox(height: 20),
+          _contentFooter(context),
+          pw.SizedBox(height: 20),
+          _termsAndConditions(context),
+        ],
+      ),
+    );
+
+    doc.addPage(
+      pw.MultiPage(
+        pageTheme: _buildTheme(
+          pageFormat,
+          await PdfGoogleFonts.robotoRegular(),
+          await PdfGoogleFonts.robotoBold(),
+          await PdfGoogleFonts.robotoItalic(),
+        ),
+        header: _buildHeader,
+        footer: _buildFooter,
+        build: (context) => [
           _contentHeader(context),
           _contentTable(context),
           pw.SizedBox(height: 20),
@@ -165,19 +190,33 @@ class Reporte {
                     padding: const pw.EdgeInsets.only(
                         left: 40, top: 10, bottom: 10, right: 20),
                     alignment: pw.Alignment.centerLeft,
-                    height: 50,
+                    height: 80,
                     child: pw.DefaultTextStyle(
                       style: pw.TextStyle(
                         color: _accentTextColor,
                         fontSize: 12,
                       ),
                       child: pw.GridView(
+                        mainAxisSpacing: 10,
                         crossAxisCount: 2,
                         children: [
-                          pw.Text('Reporte #'),
-                          pw.Text(invoiceNumber),
+                          pw.Text(
+                            'Reporte #',
+                          ),
+                          pw.Text(
+                            invoiceNumber,
+                            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                          ),
                           pw.Text('Date:'),
-                          pw.Text(_formatDate(DateTime.now())),
+                          pw.Text(
+                            _formatDate(DateTime.now()),
+                            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                          ),
+                          pw.Text('Página No.'),
+                          pw.Text(
+                            '${context.pageNumber} De ${context.pagesCount}',
+                            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                          ),
                         ],
                       ),
                     ),
@@ -211,6 +250,29 @@ class Reporte {
     );
   }
 
+  pw.Widget _buildDatosGenerales(pw.Context context) {
+    return pw.Container(
+      width: double.infinity,
+      height: 30,
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.black, width: 2),
+      ),
+      child: pw.Column(
+        children: [
+          pw.Column(
+            children: [
+              pw.Row(
+                children: [
+                  pw.Text('Cliente: '),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   pw.Widget _buildFooter(pw.Context context) {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -221,7 +283,7 @@ class Reporte {
           width: 100,
           child: pw.BarcodeWidget(
             barcode: pw.Barcode.pdf417(),
-            data: 'Invoice# $invoiceNumber',
+            data: 'CODIGO# $invoiceNumber',
             drawText: false,
           ),
         ),
@@ -278,7 +340,7 @@ class Reporte {
                 margin: const pw.EdgeInsets.only(left: 10, right: 10),
                 height: 70,
                 child: pw.Text(
-                  'Invoice to:',
+                  'Reporte para:',
                   style: pw.TextStyle(
                     color: _darkColor,
                     fontWeight: pw.FontWeight.bold,
@@ -331,7 +393,7 @@ class Reporte {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                'Thank you for your business',
+                'Gracias por su preferencia',
                 style: pw.TextStyle(
                   color: _darkColor,
                   fontWeight: pw.FontWeight.bold,
@@ -340,7 +402,7 @@ class Reporte {
               pw.Container(
                 margin: const pw.EdgeInsets.only(top: 20, bottom: 8),
                 child: pw.Text(
-                  'Payment Info:',
+                  'Atendió:',
                   style: pw.TextStyle(
                     color: baseColor,
                     fontWeight: pw.FontWeight.bold,
@@ -420,7 +482,7 @@ class Reporte {
                 ),
                 padding: const pw.EdgeInsets.only(top: 10, bottom: 4),
                 child: pw.Text(
-                  'Terms & Conditions',
+                  'Terminos & Condiciones',
                   style: pw.TextStyle(
                     fontSize: 12,
                     color: baseColor,
@@ -429,7 +491,7 @@ class Reporte {
                 ),
               ),
               pw.Text(
-                pw.LoremText().paragraph(40),
+                _MessageFooter,
                 textAlign: pw.TextAlign.justify,
                 style: const pw.TextStyle(
                   fontSize: 6,
@@ -440,9 +502,9 @@ class Reporte {
             ],
           ),
         ),
-        pw.Expanded(
-          child: pw.SizedBox(),
-        ),
+        // pw.Expanded(
+        //   child: pw.SizedBox(),
+        // ),
       ],
     );
   }

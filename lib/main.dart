@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
@@ -82,6 +85,26 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  String generateCode(String secretKey) {
+    // Obtener el tiempo actual en segundos
+    int time = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    // Concatenar la llave secreta y el tiempo actual
+    String combined = secretKey + time.toString();
+
+    // Calcular el hash criptográfico (SHA-256) del valor combinado
+    List<int> bytes = utf8.encode(combined);
+    Digest hash = sha256.convert(bytes);
+
+    // Tomar solo los primeros 4 dígitos del valor hash y convertirlos a decimal
+    int decimal = int.parse(hash.toString().substring(0, 8), radix: 16);
+
+    // Asegurarse de que el código de acceso tenga exactamente 4 dígitos
+    String code = decimal.toString().padLeft(8, '0');
+
+    return code;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,39 +115,20 @@ class _MyAppState extends State<MyApp> {
         children: ListTile.divideTiles(
           context: context,
           tiles: [
-            // const ListTile(title: Text('STATUS INSTALLATION')),
-            // ...WhatsApp.values.map((type) {
-            //   final status = _mapInstalled[type];
-
-            //   return ListTile(
-            //     title: Text(type.toString()),
-            //     trailing: status != null
-            //         ? Text(status)
-            //         : const CircularProgressIndicator.adaptive(),
-            //   );
-            // }),
-            // const ListTile(title: Text('SHARE CONTENT')),
-            // ListTile(
-            //   title: const Text('Share Text'),
-            //   trailing: const Icon(Icons.share),
-            //   onTap: () => shareWhatsapp.shareText(_kTextMessage),
-            // ),
-            // ListTile(
-            //   title: const Text('Share Image'),
-            //   trailing: const Icon(Icons.share),
-            //   onTap: () async {
-            //     final file = await flimer.pickImage();
-            //     if (file != null) {
-            //       shareWhatsapp.shareFile(file);
-            //     }
-            //   },
-            // ),
             ListTile(
-              title: const Text('Enviar PDF a número especifico'),
+              title: const Text('Genera código de 4 dígitos'),
+              trailing: const Icon(Icons.share),
+              onTap: () {
+                String code = generateCode('taller');
+                print(code);
+              },
+            ),
+            ListTile(
+              title: const Text('Enviar PDFs a número especifico'),
               trailing: const Icon(Icons.share),
               onTap: () async {
                 final dir = (await getDirectory()).path;
-                XFile file = XFile('$dir/example6.pdf', name: 'example.pdf');
+                XFile file = XFile('$dir/algo3.pdf', name: 'example.pdf');
 
                 await shareWhatsapp.share(
                   text: 'Hello World',
@@ -148,8 +152,22 @@ class _MyAppState extends State<MyApp> {
               onTap: () async {
                 final dir = (await getDirectory()).path;
                 var pdf = await generateReporte(PdfPageFormat.letter);
-                final file = File('$dir/example6.pdf');
-                await file.writeAsBytes(pdf);
+                final file = File('$dir/algo3.pdf');
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: Text('Reporte Generado'),
+                    content: Text('El reporte se ha generado correctamente'),
+                    actions: [
+                      TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('Aceptar'))
+                    ],
+                  ),
+                );
+                await file.writeAsBytes(pdf).whenComplete(() {
+                  Navigator.pop(context);
+                });
               },
             ),
             ListTile(
@@ -163,7 +181,7 @@ class _MyAppState extends State<MyApp> {
                     builder: (context) => Scaffold(
                       appBar: AppBar(),
                       body: PDFView(
-                        filePath: '$dir/example6.pdf',
+                        filePath: '$dir/algo3.pdf',
                         enableSwipe: true,
                         swipeHorizontal: true,
                         autoSpacing: false,
